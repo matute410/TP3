@@ -34,7 +34,7 @@
 #if STDIN_UART == 1
 	 #define MYSTDIN UART1
 #elif STDIN_UART == 2
-	 #define MYSTDIN LPC_UART2
+	 #define MYSTDIN LPC_USART2
 #elif STDIN_UART == 3
 	 #define MYSTDIN UART3
 #else
@@ -44,7 +44,7 @@
 #if STDOUT_UART == 1
 	 #define MYSTDOUT UART1
 #elif STDOUT_UART == 2
-	 #define MYSTDOUT LPC_UART2
+	 #define MYSTDOUT LPC_USART2
 #elif STDOUT_UART == 3
 	 #define MYSTDOUT UART3
 #else
@@ -54,7 +54,7 @@
 #if STDERR_UART == 1
 	 #define MYSTDERR UART1
 #elif STDERR_UART == 2
-	 #define MYSTDERR LPC_UART2
+	 #define MYSTDERR LPC_USART2
 #elif STDERR_UART == 3
 	 #define MYSTDERR UART3
 #else
