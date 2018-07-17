@@ -16,7 +16,7 @@
 #define TP3_5 (2)
 #define TP3_6 (3)
 
-#define TEST (TP3_4)
+#define TEST (TP3_5)
 
 
 DEBUG_PRINT_ENABLE;
@@ -184,6 +184,8 @@ int main(void)
 
 #if (TEST == TP3_5)
 
+const char *pcTextForMain = "\r\n Ejercicio 5\r\n";
+
 // Declaro recursos
 xSemaphoreHandle xBinarySemaphore;
 xQueueHandle xIntegerQueue;
@@ -222,6 +224,7 @@ static void vTaskPeriodic(void *pvParameters)
 		gpioToggle(LED1);
 		vPrintString("Tarea 1 - periodica - Activando interrupcion\r\n");
 		mainTRIGGER_INTERRUPT();
+		vPrintString("Tarea 1 - periodica - interrupcion finalizada\r\n");
 
 		//delay desde el momento de inicio de tarea
 		vTaskDelayUntil( &xLastWakeTime, PERIODIC_TASK_DELAY );
@@ -267,6 +270,9 @@ int main(void)
 {
 	//inicializo el hardware
 	prvSetupHardware();
+
+	// Imprimo inicializacion del programa
+	vPrintString(pcTextForMain);
 
    	//inicializo recursos y tareas
     xBinarySemaphore = xSemaphoreCreateBinary();
