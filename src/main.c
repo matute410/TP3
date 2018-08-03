@@ -16,7 +16,7 @@
 #define TP3_5 (2)
 #define TP3_6 (3)
 
-#define TEST (TP3_5)
+#define TEST (TP3_6)
 
 
 DEBUG_PRINT_ENABLE;
@@ -296,3 +296,86 @@ int main(void)
 }
 
 #endif // TEST == TP4_5
+
+#if (TEST == TP3_6)
+
+#define LED_SEQUENCE_LENGTH 4
+
+//defino mutex
+xSemaphoreHandle xMutex;
+
+//tarea que recibe como argumento la secuencia de leds
+static void vTaskLed(void *pvParameters)
+{
+	TickType_t xLastWakeTime;
+	//casteo el parametro
+	bool *sequence = (bool *)pvParameters;
+	char nombre[100];
+
+	while (1) {
+
+		size_t i = 0;
+
+		//intento tomar el mutex que representa el uso del recurso led
+		xSemaphoreTake(xMutex, portMAX_DELAY);
+		//sprintf("empieza secuencia de tarea %s\r\n",pcTaskGetTaskName(xTaskGetCurrentTaskHandle()));
+		vPrintString("empieza secuencia de tarea ");
+		vPrintString(pcTaskGetTaskName(xTaskGetCurrentTaskHandle()));
+		vPrintString("\r\n");
+
+		//itero sobre la secuencia
+		for (i = 0; i < LED_SEQUENCE_LENGTH; ++i) {
+			xLastWakeTime = xTaskGetTickCount();
+			if(sequence[i]){
+				//si la secuencia tiene un uno prendo el primer led y apago el segundo
+				gpioWrite( LED1, ON );
+				gpioWrite( LED2, OFF);
+			}else{
+				//si la secuencia tiene un uno prendo el segundo led y apago el primero
+				gpioWrite( LED2, ON );
+				gpioWrite( LED3, OFF);
+			}
+			//delay para poder ver la secuencia
+			vTaskDelayUntil( &xLastWakeTime, PERIODIC_TASK_DELAY );
+		}
+		//cuando termino devuelvo el semaforo
+		xSemaphoreGive(xMutex);
+		//genero un delay para dar tiempo a las otras tareas
+		vTaskDelay(PERIODIC_TASK_DELAY*10);
+	}
+}
+
+int main(void)
+{
+	//inicializo hardware
+	prvSetupHardware();
+
+	//inicializo mutex
+   	xMutex = xSemaphoreCreateMutex();
+
+   	//defino las secuencias de cada tarea
+   	bool sequenceTask1[] = {true,true,true,true};
+   	bool sequenceTask2[] = {false,false,false,false};
+   	bool sequenceTask3[] = {false,true,false,true};
+
+   	//creo las tareas
+    xTaskCreate(vTaskLed, (char *) "vTaskLed1", configMINIMAL_STACK_SIZE, sequenceTask1,
+           				(tskIDLE_PRIORITY + 1UL), (xTaskHandle *) NULL);
+
+    xTaskCreate(vTaskLed, (char *) "vTaskLed2", configMINIMAL_STACK_SIZE, sequenceTask2,
+               			(tskIDLE_PRIORITY + 1UL), (xTaskHandle *) NULL);
+
+    xTaskCreate(vTaskLed, (char *) "vTaskLed3", configMINIMAL_STACK_SIZE, sequenceTask3,
+						(tskIDLE_PRIORITY + 1UL), (xTaskHandle *) NULL);
+
+    //inicio el scheduler
+	vTaskStartScheduler();
+
+	while (1);
+
+	return ((int) NULL);
+}
+
+
+
+#endif // TEST == TP3_6
